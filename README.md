@@ -94,6 +94,13 @@ The method which clears your data.
 
 default: `localStorage.removeItem`
 
+#### `onLoaded: (data: T) => never`
+Sometimes you need to do something with the saved data, this function will be called after
+the Formik form has been filled (the form will only be set if there is data saved, and
+it's different from the current state of the form).
+
+default: `localStorage.removeItem`
+
 ## There's already the official formik-persist available
 
 Yes that's true, but that package seems to be unmaintained.

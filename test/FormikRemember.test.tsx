@@ -255,4 +255,31 @@ describe('Formik Persist', () => {
 
     expect(window.localStorage.setItem).not.toHaveBeenCalled();
   });
+
+  it('calls onLoaded after mount', () => {
+    (window as any).localStorage = {
+      getItem: () => JSON.stringify({
+        name: 'bar'
+      }),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+    };
+    const onLoaded = jest.fn();
+
+    render(
+      <Formik initialValues={{ name: 'jared' }} onSubmit={noop}>
+        {() =>
+            <Remember
+              clearOnOnmount={false}
+              saveOnlyOnSubmit={true}
+              name="signup"
+              debounceWaitMs={0}
+              onLoaded={onLoaded}
+            />
+        }
+      </Formik>
+    );
+
+    expect(onLoaded).toBeCalled()
+  })
 });

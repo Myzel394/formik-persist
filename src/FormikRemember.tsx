@@ -16,6 +16,8 @@ export interface FormikRememberProps<T> {
   setData?: (name: string, stringData: string) => void;
   getData?: (name: string) => string | undefined | null;
   clearData?: (name: string) => void;
+
+  onLoaded?: (data: T) => never;
 }
 
 const DEFAULT_PROPS = {
@@ -36,6 +38,7 @@ const FormikRemember = <T extends any = any>(props: FormikRememberProps<T>) => {
     dump,
     clearOnOnmount,
     saveOnlyOnSubmit,
+    onLoaded,
   } = Object.assign(DEFAULT_PROPS, props);
 
   const { setValues, values, isSubmitting } = useFormikContext<T>();
@@ -62,6 +65,10 @@ const FormikRemember = <T extends any = any>(props: FormikRememberProps<T>) => {
       if (!isEqual(savedValues, values)) {
         $savedValues.current = savedValues;
         setValues(savedValues);
+
+        if (onLoaded) {
+          onLoaded(savedValues);
+        }
       }
     }
   })
