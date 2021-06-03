@@ -1,6 +1,6 @@
 import { act, render } from '@testing-library/react';
 import * as React from 'react';
-import { Formik, FormikProps } from 'formik';
+import { Formik, FormikProps, Field, Form } from 'formik';
 import Remember from '../src/FormikRemember';
 
 // tslint:disable-next-line:no-empty
@@ -188,6 +188,87 @@ describe('Formik Persist', () => {
     expect(window.localStorage.removeItem).not.toHaveBeenCalled();
   });
 
+  it('does not save on submit when not valid and saveOnlyOnSubmit is active', () => {
+    (window as any).localStorage = {
+      getItem: jest.fn(),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+    };
+    let injectedFormik: FormikProps<any>;
+
+    const { unmount } = render(
+      <Formik initialValues={{ text: 'jared' }} onSubmit={noop}>
+        {formik => {
+          injectedFormik = formik;
+
+          return (
+            <Form>
+              <Field name="text" />
+              <Remember
+                clearOnOnmount={false}
+                saveOnlyOnSubmit={true}
+                name="signup"
+                debounceWaitMs={0}
+              />
+            </Form>
+          );
+        }}
+      </Formik>
+    );
+
+    act(() => {
+      injectedFormik.setErrors({
+        text: 'Test'
+      })
+      injectedFormik.setSubmitting(true);
+    });
+
+    act(() => {
+      injectedFormik.setSubmitting(false);
+    });
+
+    unmount();
+
+    expect(window.localStorage.setItem).not.toHaveBeenCalled();
+  });
+
+  it('does not save when submitting and saveOnlyOnSubmit is active', () => {
+    (window as any).localStorage = {
+      getItem: jest.fn(),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+    };
+    let injectedFormik: FormikProps<any>;
+
+    const { unmount } = render(
+      <Formik initialValues={{ text: 'jared' }} onSubmit={noop}>
+        {formik => {
+          injectedFormik = formik;
+
+          return (
+            <Form>
+              <Field name="text" />
+              <Remember
+                clearOnOnmount={false}
+                saveOnlyOnSubmit={true}
+                name="signup"
+                debounceWaitMs={0}
+              />
+            </Form>
+          );
+        }}
+      </Formik>
+    );
+
+    act(() => {
+      injectedFormik.setSubmitting(true);
+    });
+
+    unmount();
+
+    expect(window.localStorage.setItem).not.toHaveBeenCalled();
+  });
+
   it('saves on submit when saveOnlyOnSubmit is present', () => {
     (window as any).localStorage = {
       getItem: jest.fn(),
@@ -215,6 +296,10 @@ describe('Formik Persist', () => {
 
     act(() => {
       injectedFormik.setSubmitting(true);
+    });
+
+    act(() => {
+      injectedFormik.setSubmitting(false);
     });
 
     unmount();

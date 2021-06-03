@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useFormikContext } from 'formik';
 import isEqual from 'react-fast-compare';
 import useComponentWillMount from './useComponentWillMount';
+import usePrevious from './usePrevious';
 
 export interface FormikRememberProps<T> {
   name: string;
@@ -41,7 +42,8 @@ const FormikRemember = <T extends any = any>(props: FormikRememberProps<T>) => {
     onLoaded,
   } = Object.assign(DEFAULT_PROPS, props);
 
-  const { setValues, values, isSubmitting } = useFormikContext<T>();
+  const { setValues, values, isSubmitting, isValid } = useFormikContext<T>();
+  const wasSubmitting = usePrevious(isSubmitting);
 
   const $savedValues = useRef<T>();
 
@@ -95,7 +97,12 @@ const FormikRemember = <T extends any = any>(props: FormikRememberProps<T>) => {
   // saveOnlyOnSubmit
   useEffect(
     () => () => {
-      if (saveOnlyOnSubmit && isSubmitting) {
+      if (
+        saveOnlyOnSubmit &&
+        wasSubmitting &&
+        !isSubmitting &&
+        isValid
+      ) {
         saveForm(values);
       }
     },
