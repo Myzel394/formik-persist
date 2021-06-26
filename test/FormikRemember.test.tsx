@@ -6,7 +6,7 @@ import Remember from '../src/FormikRemember';
 // tslint:disable-next-line:no-empty
 const noop = () => {};
 
-describe('Formik Persist', () => {
+describe('Formik Remember', () => {
   it('loads data on mount', () => {
     (window as any).localStorage = {
       getItem: jest.fn(),
@@ -366,5 +366,38 @@ describe('Formik Persist', () => {
     );
 
     expect(onLoaded).toBeCalled()
+  })
+
+  it('can form still submit', async () => {
+    (window as any).localStorage = {
+      getItem: jest.fn(),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+    };
+    const submitFn = jest.fn();
+    let injectedFormik: FormikProps<any>;
+
+    const { unmount, getByTestId } = render(
+      <Formik initialValues={{ name: 'jared' }} onSubmit={submitFn}>
+        {formik => {
+          injectedFormik = formik;
+
+          return (
+            <Form>
+              <button data-testid="button" type="submit" />
+              <Remember name="test" />
+            </Form>
+          );
+        }}
+      </Formik>
+    )
+
+    await act(async () => {
+      const button = getByTestId("button");
+
+      await button.click();
+    });
+
+    expect(submitFn).toBeCalled()
   })
 });
